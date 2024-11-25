@@ -1,0 +1,57 @@
+
+    - name: Creates directory
+      ansible.builtin.file:
+        path: /usr/src/statping
+        state: directory
+        owner: ansible-c
+        group: ans-admin
+        mode: 0775
+        recurse: yes
+      become_user: root
+
+    - name: "Copy Statping Install File"
+      copy:
+        src:  "{{ansible_roles_path}}/files/statping/install.sh"
+        dest: /usr/src/statping/
+        owner: ansible-c
+        group: ans-admin
+        mode: '755'
+      become_user: root
+
+    - name: "Copy Statping Install File"
+      template:
+        src:  "{{ansible_roles_path}}/files/statping/status.conf.j2"
+        dest: /etc/httpd/conf.d/
+        owner: apache
+        group: apache
+        mode: '755'
+      become_user: root
+
+    - name: Install Statping
+      command: sudo sh /usr/src/statping/install.sh 
+      become_user: root
+
+    - name: "Copy Statping Systemd File"
+      copy:
+        src:  "{{ansible_roles_path}}/files/statping/statping.service"
+        dest: /etc/systemd/system/
+        owner: ansible-c
+        group: ans-admin
+        mode: '755'
+      become_user: root
+
+    - name: Execute the bash script
+      command: systemctl daemon-reload
+      become_user: root
+
+    - name: Execute the bash script
+      command: systemctl enable --now statping
+      become_user: root
+
+    - name: Execute the bash script
+      command: sudo service statping restart
+      become_user: root
+    
+    - name: Execute the bash script
+      command: sudo service httpd restart
+      become_user: root
